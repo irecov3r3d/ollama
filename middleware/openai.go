@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -342,10 +342,12 @@ func CompletionsMiddleware() gin.HandlerFunc {
 
 		c.Request.Body = io.NopCloser(&b)
 
+			randBytes := make([]byte, 4)
+			rand.Read(randBytes)
 		w := &CompleteWriter{
 			BaseWriter:    BaseWriter{ResponseWriter: c.Writer},
 			stream:        req.Stream,
-			id:            fmt.Sprintf("cmpl-%d", rand.Intn(999)),
+				id:            fmt.Sprintf("cmpl-%x", randBytes),
 			streamOptions: req.StreamOptions,
 		}
 
@@ -434,10 +436,12 @@ func ChatMiddleware() gin.HandlerFunc {
 
 		c.Request.Body = io.NopCloser(&b)
 
+			randBytes := make([]byte, 4)
+			rand.Read(randBytes)
 		w := &ChatWriter{
 			BaseWriter:    BaseWriter{ResponseWriter: c.Writer},
 			stream:        req.Stream,
-			id:            fmt.Sprintf("chatcmpl-%d", rand.Intn(999)),
+				id:            fmt.Sprintf("chatcmpl-%x", randBytes),
 			streamOptions: req.StreamOptions,
 		}
 
@@ -545,8 +549,10 @@ func ResponsesMiddleware() gin.HandlerFunc {
 
 		c.Request.Body = io.NopCloser(&b)
 
-		responseID := fmt.Sprintf("resp_%d", rand.Intn(999999))
-		itemID := fmt.Sprintf("msg_%d", rand.Intn(999999))
+		randBytes := make([]byte, 8)
+		rand.Read(randBytes)
+		responseID := fmt.Sprintf("resp_%x", randBytes[:4])
+		itemID := fmt.Sprintf("msg_%x", randBytes[4:])
 
 		w := &ResponsesWriter{
 			BaseWriter: BaseWriter{ResponseWriter: c.Writer},

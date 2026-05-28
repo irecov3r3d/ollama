@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"cmp"
 	"context"
+	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +15,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"math"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/netip"
@@ -2090,12 +2091,9 @@ func (s *Server) PsHandler(c *gin.Context) {
 }
 
 func toolCallId() string {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, 8)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return "call_" + strings.ToLower(string(b))
+	b := make([]byte, 4)
+	rand.Read(b)
+	return "call_" + hex.EncodeToString(b)
 }
 
 func (s *Server) ChatHandler(c *gin.Context) {
