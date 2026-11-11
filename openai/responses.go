@@ -1,9 +1,9 @@
 package openai
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -1084,7 +1084,9 @@ func (c *ResponsesStreamConverter) processThinking(thinking string) []ResponsesS
 	// Start reasoning item if not started
 	if !c.reasoningStarted {
 		c.reasoningStarted = true
-		c.reasoningItemID = fmt.Sprintf("rs_%d", rand.Intn(999999))
+		randBytes := make([]byte, 4)
+		rand.Read(randBytes)
+		c.reasoningItemID = fmt.Sprintf("rs_%x", randBytes)
 
 		events = append(events, c.newEvent("response.output_item.added", map[string]any{
 			"output_index": c.outputIndex,
@@ -1152,7 +1154,9 @@ func (c *ResponsesStreamConverter) processToolCalls(toolCalls []api.ToolCall) []
 	converted := ToToolCalls(toolCalls)
 
 	for i, tc := range converted {
-		fcItemID := fmt.Sprintf("fc_%d_%d", rand.Intn(999999), i)
+		randBytes := make([]byte, 4)
+		rand.Read(randBytes)
+		fcItemID := fmt.Sprintf("fc_%x_%d", randBytes, i)
 
 		// Store for final output (with status: completed)
 		toolCallItem := map[string]any{
